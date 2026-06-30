@@ -4,195 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle 2026</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Confetti JS for animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-body: #f8f9fa;
-            --bg-sidebar: #1e293b;
+            --bg-sidebar: #0f172a;
             --text-sidebar: #cbd5e1;
             --text-sidebar-hover: #ffffff;
             --bg-card: #ffffff;
             --text-main: #334155;
             --primary: #3b82f6;
-            --success: #10b981;
-            --warning: #f59e0b;
         }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; margin: 0; }
         
         /* Sidebar */
-        .sidebar { width: 250px; background-color: var(--bg-sidebar); color: var(--text-sidebar); display: flex; flex-direction: column; transition: 0.3s; z-index: 1000; }
+        .sidebar { width: 250px; background-color: var(--bg-sidebar); color: var(--text-sidebar); display: flex; flex-direction: column; transition: 0.3s; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h4 { color: white; margin: 0; font-size: 1.2rem; }
-        .nav-link { color: var(--text-sidebar); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; cursor: pointer; }
+        .sidebar-header h4 { color: white; margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;}
+        .nav-links { flex: 1; overflow-y: auto; padding-top: 10px; }
+        .nav-link { color: var(--text-sidebar); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; cursor: pointer; text-decoration: none; font-size: 0.95rem; }
         .nav-link:hover, .nav-link.active { background-color: rgba(255,255,255,0.05); color: var(--text-sidebar-hover); border-left-color: var(--primary); }
         
         /* Main Content */
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .tab-content { display: none; background: var(--bg-card); border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 20px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
+        .tab-content { display: none; background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Header & Actions */
-        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #dee2e6; }
-        .content-header h2 { margin: 0; font-size: 1.5rem; color: #0f172a; }
+        /* Header */
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+        .content-header h2 { margin: 0; font-size: 1.5rem; color: #1e293b; }
         
         /* Table Controls */
-        .table-responsive { max-height: 70vh; overflow-y: auto; }
-        table th { position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .editable-cell { cursor: text; padding: 5px; border-radius: 4px; transition: background 0.2s; min-height: 24px; display: inline-block; width: 100%; }
-        .editable-cell:hover { background-color: #f1f5f9; outline: 1px dashed #cbd5e1; }
-        .editable-cell:focus { background-color: white; outline: 2px solid var(--primary); }
+        .table-responsive { max-height: calc(100vh - 180px); overflow-y: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
+        table { margin: 0; width: 100%; border-collapse: collapse; }
+        table th { position: sticky; top: 0; background: #f8fafc; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 15px; border-bottom: 2px solid #e2e8f0; cursor: pointer; transition: background 0.2s; user-select: none; }
+        table th:hover { background-color: #e2e8f0; color: #1e293b; }
+        table td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; font-size: 0.95rem; }
+        table tbody tr:hover { background-color: #f1f5f9; }
         
-        /* Status Select */
-        .status-select { border: none; font-size: 0.8rem; font-weight: bold; border-radius: 20px; padding: 4px 10px; cursor: pointer; outline: none; appearance: none; text-align: center; }
+        /* Editable Cells */
+        .editable-cell { cursor: text; padding: 6px; border-radius: 4px; transition: 0.2s; min-height: 24px; display: block; width: 100%; border: 1px solid transparent; }
+        .editable-cell:hover { border-color: #cbd5e1; background-color: #fff; }
+        .editable-cell:focus { outline: 2px solid var(--primary); background-color: #fff; border-color: transparent; }
+        
+        /* Status Badges */
+        .status-select { border: none; font-size: 0.75rem; font-weight: 700; border-radius: 20px; padding: 5px 12px; cursor: pointer; outline: none; appearance: none; text-align: center; text-transform: uppercase; }
         .status-concluido { background-color: #d1fae5; color: #065f46; }
         .status-aberto { background-color: #dbeafe; color: #1e40af; }
         .status-aguardando { background-color: #fef3c7; color: #92400e; }
         .status-na { background-color: #f1f5f9; color: #475569; }
         
-        /* Progress Bar */
-        .progress-wrapper { display: flex; align-items: center; gap: 10px; }
-        .progress-input { width: 60px; padding: 2px 5px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+        /* Progress Input */
+        .progress-wrapper { display: flex; align-items: center; gap: 8px; }
+        .progress-input { width: 65px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; font-size: 0.9rem; }
+        .progress-input:focus { outline: 2px solid var(--primary); border-color: transparent; }
         
-        /* Mobile Toggle */
-        .mobile-toggle { display: none; position: fixed; top: 15px; right: 15px; z-index: 1001; }
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; height: 100%; left: -250px; }
-            .sidebar.show { left: 0; }
-            .mobile-toggle { display: block; }
-            .main-content { padding-top: 60px; }
-        }
+        /* Medals (Notas) */
+        .nota-medal { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; background: #f8fafc; padding: 4px 10px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: text; min-width: 50px;}
+        .nota-ouro { color: #b45309; background: #fef3c7; border-color: #fde68a; } /* Gold */
+        .nota-prata { color: #334155; background: #f1f5f9; border-color: #cbd5e1; } /* Silver */
+        .nota-bronze { color: #78350f; background: #ffedd5; border-color: #fed7aa; } /* Bronze */
         
-        /* Save Button Float */
-        .btn-save-float { position: fixed; bottom: 20px; right: 20px; border-radius: 50px; padding: 10px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; display: none; }
+        /* Floating Buttons */
+        .btn-save-float { position: fixed; bottom: 25px; right: 25px; border-radius: 50px; padding: 12px 24px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); z-index: 1000; display: none; font-weight: bold; font-size: 1rem; transition: transform 0.2s; }
+        .btn-save-float:hover { transform: translateY(-2px); }
+        
+        /* Actions Column */
+        .action-btns { display: flex; gap: 5px; }
+        .btn-icon { padding: 4px 8px; font-size: 0.9rem; }
+        
+        /* Sort Icons */
+        .sort-icon { font-size: 0.8rem; margin-left: 5px; color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <button class="btn btn-primary mobile-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i> Menu</button>
-    <button class="btn btn-success btn-save-float" id="btnSave" onclick="saveData()"><i class="bi bi-save"></i> Salvar Alterações</button>
+    <!-- Botão Flutuante de Salvar -->
+    <button class="btn btn-success btn-save-float" id="btnSave" onclick="saveData()">
+        <i class="bi bi-cloud-check-fill"></i> Salvar Alterações
+    </button>
 
+    <!-- Menu Lateral -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h4>🚀 Dashboard 2026</h4>
         </div>
-        <div class="nav-links">
-            </div>
-        <div class="mt-auto p-3">
-            <button class="btn btn-outline-light w-100 btn-sm" onclick="exportData()"><i class="bi bi-download"></i> Exportar Dados</button>
-            <div class="mt-2 text-center text-muted" style="font-size: 0.75rem;">
-                Os dados são salvos no seu navegador (LocalStorage).
+        <div class="nav-links" id="navLinks">
+            <!-- Gerado via JS -->
+        </div>
+        <div class="mt-auto p-3 border-top border-secondary">
+            <button class="btn btn-outline-light w-100 btn-sm mb-2" onclick="exportData()">
+                <i class="bi bi-download"></i> Fazer Backup
+            </button>
+            <div class="text-center text-muted" style="font-size: 0.7rem;">
+                Dados salvos no seu navegador.
             </div>
         </div>
     </div>
 
+    <!-- Conteúdo Principal -->
     <div class="main-content" id="mainContent">
-        </div>
+        <!-- Telas geradas via JS -->
+    </div>
 
+    <!-- Modal Adicionar Item -->
     <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Adicionar Item</h5>
+                    <h5 class="modal-title" id="modalTitle">Novo Item</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="modalBody">
-                    </div>
+                    <!-- Form dinâmico gerado via JS -->
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveNewItem()">Salvar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewItem()">Adicionar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Dados Iniciais Baseados no Arquivo (Caso seja o primeiro acesso)
-        const initialData = {
-            carro: {
-                title: "🚗 Manutenção do Carro",
-                columns: ["#", "ITEM", "KM", "STATUS", "VALOR", "DATA"],
-                rows: [
-                    { id: "c1", "#": "1", "ITEM": "TROCA DE ÓLEO", "KM": "147018", "STATUS": "REALIZADO", "VALOR": "0", "DATA": "2025-09-05" },
-                    { id: "c2", "#": "2", "ITEM": "TROCA DE ÓLEO", "KM": "151518", "STATUS": "REALIZADO", "VALOR": "190", "DATA": "2026-05-19" },
-                    { id: "c3", "#": "3", "ITEM": "REVISÃO", "KM": "166518", "STATUS": "", "VALOR": "", "DATA": "" }
-                ]
-            },
-            metas: {
-                title: "🎯 Metas 2026",
-                columns: ["Item", "Prazo", "Progresso", "Status"],
-                rows: [
-                    { id: "m1", "Item": "Fazer as sessões de fono do joao", "Prazo": "", "Progresso": "100", "Status": "CONCLUIDO" },
-                    { id: "m2", "Item": "Pagar dívida do carro", "Prazo": "", "Progresso": "100", "Status": "CONCLUIDO" },
-                    { id: "m3", "Item": "Trocar porta do banheiro de fora", "Prazo": "", "Progresso": "0", "Status": "ABERTO" }
-                ]
-            },
-            series: {
-                title: "📺 Séries",
-                columns: ["Item", "Tipo", "Streaming", "Progresso", "STATUS", "NOTA"],
-                rows: [
-                    { id: "s1", "Item": "Origem 4ª Temporada", "Tipo": "Terror", "Streaming": "Globo Player", "Progresso": "25", "STATUS": "ABERTO", "NOTA": "" },
-                    { id: "s2", "Item": "Euphoria 3 Temporada", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "100", "STATUS": "CONCLUIDO", "NOTA": "10" }
-                ]
-            },
-            animes: {
-                title: "⛩️ Animes",
-                columns: ["Item", "Tipo", "Streaming", "Progresso", "STATUS", "NOTA"],
-                rows: [
-                    { id: "a1", "Item": "Jujutsu Kaisen 3 temporada", "Tipo": "Ação", "Streaming": "Crunchroll", "Progresso": "100", "STATUS": "CONCLUIDO", "NOTA": "9" }
-                ]
-            },
-            filmes: {
-                title: "🎬 Filmes",
-                columns: ["Item", "Tipo", "Streaming", "Progresso", "STATUS", "NOTA"],
-                rows: [
-                    { id: "f1", "Item": "O menino e a Garça", "Tipo": "Animação", "Streaming": "Netflix", "Progresso": "0", "STATUS": "AGUARDANDO", "NOTA": "" }
-                ]
-            },
-            jogos: {
-                title: "🎮 Jogos",
-                columns: ["Item", "Tipo", "Console", "Progresso", "STATUS", "NOTA"],
-                rows: [
-                    { id: "j1", "Item": "Luigi's Mansion 3", "Tipo": "Aventura", "Console": "Nintendo", "Progresso": "100", "STATUS": "CONCLUIDO", "NOTA": "9" }
-                ]
-            }
-        };
+        // ==========================================
+        // BASE DE DADOS COMPLETA (Extraída da sua planilha)
+        // ==========================================
+        const initialData = {"carro": {"title": "🚗 Manutenção do Carro", "columns": ["#", "ITEM", "KM", "STATUS", "VALOR", "DATA"], "rows": [{"id": "carro_0", "#": "1", "ITEM": "TROCA DE ÓLEO", "KM": "147018", "STATUS": "REALIZADO", "VALOR": "0", "DATA": "2025-09-05"}, {"id": "carro_1", "#": "2", "ITEM": "TROCA DE ÓLEO", "KM": "151518", "STATUS": "REALIZADO", "VALOR": "190", "DATA": "2026-05-19"}, {"id": "carro_2", "#": "3", "ITEM": "TROCA DE ÓLEO", "KM": "156518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_3", "#": "4", "ITEM": "TROCA DE ÓLEO", "KM": "161518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_4", "#": "5", "ITEM": "REVISÃO", "KM": "166518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_5", "#": "6", "ITEM": "TROCA DE ÓLEO", "KM": "171518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_6", "#": "7", "ITEM": "TROCA DE ÓLEO", "KM": "176518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_7", "#": "8", "ITEM": "TROCA DE ÓLEO", "KM": "181518", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_8", "#": "#", "ITEM": "ITEM", "KM": "KM", "STATUS": "STATUS", "VALOR": "VALOR", "DATA": "DATA"}, {"id": "carro_9", "#": "1", "ITEM": "TROCA DE ÓLEO", "KM": "", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_10", "#": "2", "ITEM": "TROCA DE ÓLEO", "KM": "", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_11", "#": "3", "ITEM": "TROCA DE ÓLEO", "KM": "", "STATUS": "", "VALOR": "", "DATA": ""}, {"id": "carro_12", "#": "4", "ITEM": "TROCA DE ÓLEO", "KM": "", "STATUS": "", "VALOR": "", "DATA": ""}]}, "metas": {"title": "🎯 Metas 2026", "columns": ["Item", "PRAZO", "Progresso", "STATUS "], "rows": [{"id": "metas_0", "Item": "Fazer as sessões de fono do joao", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_1", "Item": "Emprestimo itau", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_2", "Item": "Emprestimo nubank 1", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_3", "Item": "Emprestimo nubank 2", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_4", "Item": "Trocar porta do banheiro de fora", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_5", "Item": "Pagar dívida do carro", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_6", "Item": "Tirar documento do carro", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_7", "Item": "Tirar DUT do carro", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_8", "Item": "colocar o Joao para fazer natação", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_9", "Item": "Consertar Liquidificador", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_10", "Item": "Trocar óculos do João", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_11", "Item": "Colocar familia no plano de saúde", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_12", "Item": "Limpar e formatar o computador", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_13", "Item": "Pagar o IPTU da casa", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_14", "Item": "Comprar um apartamento", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_15", "Item": "Ajeitar ar do carro", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_16", "Item": "Comprar material da escola do joao", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_17", "Item": "trocar porta da sala", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_18", "Item": "Fazer sessões de psicologia do joao", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_19", "Item": "Meta de ano da academia", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_20", "Item": "Participar de uma corrida", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_21", "Item": "Carteira de habilitação da rafaela", "PRAZO": "", "Progresso": "0", "STATUS ": ""}, {"id": "metas_22", "Item": "Ajeitar janela do quarto", "PRAZO": "", "Progresso": "100", "STATUS ": "CONCLUIDO"}, {"id": "metas_23", "Item": "Ter reserva de emergência - 20 k", "PRAZO": "", "Progresso": "0", "STATUS ": ""}]}, "series": {"title": "📺 Séries", "columns": ["Item", "Tipo", "Streaming", "Progresso", "STATUS ", "NOTA"], "rows": [{"id": "series_0", "Item": "Origem 4ª Temporada", "Tipo": "Terror", "Streaming": "Globo Player", "Progresso": "25", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "series_1", "Item": "Spider Nior", "Tipo": "Aventura", "Streaming": "Amazon", "Progresso": "75", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "series_2", "Item": "Euphoria 3 Temporada", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-08"}, {"id": "series_3", "Item": "Alice in borderland", "Tipo": "Aventura", "Streaming": "Disney Plus", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "series_4", "Item": "Cavaleiro dos 7 reinos", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "10"}, {"id": "series_5", "Item": "Demolidor Renascido - 2ª Temporada", "Tipo": "Heroi", "Streaming": "Disney Plus", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "series_6", "Item": "Fallout 2 temporada", "Tipo": "Ficção Científica", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "series_7", "Item": "One Piece 2 temporada", "Tipo": "Aventura", "Streaming": "Netflix", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "series_8", "Item": "Paradise 2 temporada", "Tipo": "Ficção Científica", "Streaming": "Disney Plus", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-08"}, {"id": "series_9", "Item": "Percy Jackson 2 temporada", "Tipo": "Aventura", "Streaming": "Disney Plus", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "series_10", "Item": "The Boy's 5 Temporada", "Tipo": "Drama", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "8"}, {"id": "series_11", "Item": "The Pitt 2 temporada", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "25", "STATUS ": "ABERTO", "NOTA": "9"}, {"id": "series_12", "Item": "Casa do Dragão 3º temporada", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "0", "STATUS ": "", "NOTA": ""}]}, "animes": {"title": "⛩️ Animes", "columns": ["Item", "Tipo", "Streaming", "Progresso", "STATUS ", "NOTA"], "rows": [{"id": "animes_0", "Item": "Jujutsu Kaisen 3 temporada", "Tipo": "Ação", "Streaming": "Crunchroll", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "animes_1", "Item": "Lord of Mysteries", "Tipo": "DarkFantansy", "Streaming": "Crunchroll", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "animes_2", "Item": "O ano que Haiako morreu", "Tipo": "Suspense/ Terror", "Streaming": "Netflix", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-05"}, {"id": "animes_3", "Item": "Invencível 4 temporada", "Tipo": "Aventura", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "animes_4", "Item": "Hell's Paradise 2 temporada", "Tipo": "Aventura", "Streaming": "Crunchroll", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "animes_5", "Item": "Frieren 2 temporada", "Tipo": "Aventura", "Streaming": "Crunchroll", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "animes_6", "Item": "Beastars - O Lobo Bom", "Tipo": "Aventura", "Streaming": "Netflix", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "animes_7", "Item": "Sentenced to Be a Hero", "Tipo": "Aventura", "Streaming": "Crunchroll", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "animes_8", "Item": "Dungeon Mesh", "Tipo": "Aventura", "Streaming": "Netflix", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "animes_9", "Item": "Star wars maul shadow lord", "Tipo": "Aventura", "Streaming": "Star+", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "animes_10", "Item": "ReZero 4ª Temporada", "Tipo": "Aventura", "Streaming": "Crunchroll", "Progresso": "50", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "animes_11", "Item": "Takopi´s original sin", "Tipo": "Ação", "Streaming": "Crunchroll", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "animes_12", "Item": "Dorohedoro 2 temporada", "Tipo": "Fantasia", "Streaming": "Netflix", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "animes_13", "Item": "Bleach Final", "Tipo": "Aventura", "Streaming": "Star+", "Progresso": "0", "STATUS ": "", "NOTA": ""}]}, "filmes": {"title": "🎬 Filmes", "columns": ["Item", "Tipo", "Streaming", "Progresso", "STATUS ", "NOTA"], "rows": [{"id": "filmes_0", "Item": "O menino e a Garça", "Tipo": "Animação", "Streaming": "Netflix", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "filmes_1", "Item": "Silent Hill - Retorno", "Tipo": "Terror", "Streaming": "Cinema", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "5"}, {"id": "filmes_2", "Item": "O devorador de Estrelas", "Tipo": "Sci-Fi", "Streaming": "Cinema", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "10"}, {"id": "filmes_3", "Item": "Telefone Preto 2", "Tipo": "Terror", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-05"}, {"id": "filmes_4", "Item": "Mario Galaxy", "Tipo": "Animação", "Streaming": "Cinema", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "8"}, {"id": "filmes_5", "Item": "Exterminio - Legado dos Ossos", "Tipo": "Terror", "Streaming": "Cinema", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-07"}, {"id": "filmes_6", "Item": "Hament", "Tipo": "Drama", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "filmes_7", "Item": "Cara de um fucinho de outro", "Tipo": "Animação", "Streaming": "Cinema", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "filmes_8", "Item": "Frio nos Ossos", "Tipo": "Terror", "Streaming": "MAX", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-08"}, {"id": "filmes_9", "Item": "Uma batalha após outra", "Tipo": "Drama", "Streaming": "MAX", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "8"}, {"id": "filmes_10", "Item": "Shainsaw Man: Arco Reze", "Tipo": "Animação", "Streaming": "Amazon", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "filmes_11", "Item": "F1 - O filme", "Tipo": "Drama", "Streaming": "Apple", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "filmes_12", "Item": "Obssessão", "Tipo": "Terror", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": "10"}, {"id": "filmes_13", "Item": "Blackrooms", "Tipo": "Terror", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "filmes_14", "Item": "Avatar 3", "Tipo": "Épico", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "filmes_15", "Item": "Homem aranha 4 - um novo dia", "Tipo": "Heroi", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "filmes_16", "Item": "Vingadores Dooms Day", "Tipo": "Heroi", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "filmes_17", "Item": "Duna 3", "Tipo": "Épico", "Streaming": "Cinema", "Progresso": "0", "STATUS ": "", "NOTA": ""}]}, "jogos": {"title": "🎮 Jogos", "columns": ["Item", "Tipo", "Console ", "Progresso", "STATUS ", "NOTA"], "rows": [{"id": "jogos_0", "Item": "Resident Evil 0", "Tipo": "Terror", "Console ": "Nintendo", "Progresso": "25", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "jogos_1", "Item": "Super metroid dead switch", "Tipo": "Ação / Aventura", "Console ": "Nintendo", "Progresso": "25", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "jogos_2", "Item": "Star wars Outlads", "Tipo": "Ação / Aventura", "Console ": "PS5", "Progresso": "75", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "jogos_3", "Item": "Luigi's Mansion 3", "Tipo": "Ação / Aventura", "Console ": "Nintendo", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "9"}, {"id": "jogos_4", "Item": "Reanimal", "Tipo": "Terror", "Console ": "PS5", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "10"}, {"id": "jogos_5", "Item": "Mario Odyssei", "Tipo": "Ação / Aventura", "Console ": "Nintendo", "Progresso": "75", "STATUS ": "ABERTO", "NOTA": "10"}, {"id": "jogos_6", "Item": "Pragmata", "Tipo": "Ação / Aventura", "Console ": "PS5", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": "2026-05-08"}, {"id": "jogos_7", "Item": "Mario Wonder", "Tipo": "Ação / Aventura", "Console ": "Nintendo", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "jogos_8", "Item": "Resident Evil Requiem", "Tipo": "Terror", "Console ": "PS5", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "jogos_9", "Item": "Silent Hill f", "Tipo": "Ação / Aventura", "Console ": "XBOX", "Progresso": "100", "STATUS ": "CONCLUIDO", "NOTA": "2026-05-09"}, {"id": "jogos_10", "Item": "Metal Gear Solid 3 Remake", "Tipo": "Ação / Aventura", "Console ": "PS5", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "jogos_11", "Item": "Split Fiction", "Tipo": "Ação / Aventura", "Console ": "PS5", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "jogos_12", "Item": "Wahammer 40k 2", "Tipo": "Ação / Aventura", "Console ": "XBOX", "Progresso": "0", "STATUS ": "AGUARDANDO", "NOTA": ""}, {"id": "jogos_13", "Item": "007 First Figther", "Tipo": "Ação / Aventura", "Console ": "PS5", "Progresso": "0", "STATUS ": "", "NOTA": ""}]}, "livros": {"title": "📚 Livros", "columns": ["Item", "Tipo", "Progresso", "STATUS ", "NOTA"], "rows": [{"id": "livros_0", "Item": "Akira Vol 5", "Tipo": "Mangá", "Progresso": "75", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "livros_1", "Item": "Boa Noite Punpun", "Tipo": "Mangá", "Progresso": "75", "STATUS ": "ABERTO", "NOTA": ""}, {"id": "livros_2", "Item": "Akira Vol 6", "Tipo": "Mangá", "Progresso": "0", "STATUS ": "", "NOTA": ""}, {"id": "livros_3", "Item": "Trilogia dos Espinhos PARTE 2", "Tipo": "Drama/ Romance", "Progresso": "0", "STATUS ": "", "NOTA": ""}]}};
 
         let appData = {};
-        let currentTabId = "carro";
-        let hasChanges = false;
+        let currentTabId = "";
+        let currentModalTab = "";
+        let sortConfig = {}; // Armazena a configuração de ordenação de cada tabela
 
-        // Inicialização
+        // ==========================================
+        // INICIALIZAÇÃO
+        // ==========================================
         function initApp() {
-            const saved = localStorage.getItem('dashboard2026_data');
+            const saved = localStorage.getItem('dashboard2026_data_v4');
             if (saved) {
                 appData = JSON.parse(saved);
+                for(let k in initialData) {
+                    if(!appData[k]) appData[k] = initialData[k];
+                }
             } else {
-                appData = JSON.parse(JSON.stringify(initialData)); // Cópia profunda
+                appData = JSON.parse(JSON.stringify(initialData));
             }
+            
             renderMenu();
             renderAllTabs();
             showTab(Object.keys(appData)[0]);
         }
 
-        // Renderizar Menu
+        // ==========================================
+        // RENDERIZAÇÃO
+        // ==========================================
         function renderMenu() {
-            const navLinks = document.querySelector('.nav-links');
+            const navLinks = document.getElementById('navLinks');
             navLinks.innerHTML = "";
             for (const key in appData) {
                 const tab = appData[key];
-                const link = document.createElement('a');
-                link.className = 'nav-link';
-                link.id = `nav-${key}`;
-                link.onclick = () => showTab(key);
-                link.innerHTML = `<span>${tab.title}</span>`;
-                navLinks.appendChild(link);
+                navLinks.innerHTML += `<a class="nav-link" id="nav-${key}" onclick="showTab('${key}')">${tab.title}</a>`;
             }
         }
 
-        // Mostrar Aba Específica
         function showTab(tabId) {
             currentTabId = tabId;
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -200,56 +181,8 @@
             
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`nav-${tabId}`).classList.add('active');
-            
-            if (window.innerWidth <= 768) toggleSidebar();
         }
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
-
-        // Marca que houve alteração para mostrar o botão de salvar
-        function markChanged() {
-            hasChanges = true;
-            document.getElementById('btnSave').style.display = 'block';
-        }
-
-        // Função utilitária para gerar dropdown de Status
-        function getStatusSelect(value, rowId, colName) {
-            const statuses = ["CONCLUIDO", "ABERTO", "AGUARDANDO", "REALIZADO", "STAND BY", ""];
-            let val = value ? value.toString().toUpperCase() : "";
-            
-            let colorClass = "status-na";
-            if (val === "CONCLUIDO" || val === "REALIZADO") colorClass = "status-concluido";
-            else if (val === "ABERTO") colorClass = "status-aberto";
-            else if (val === "AGUARDANDO" || val === "STAND BY") colorClass = "status-aguardando";
-
-            let select = `<select class="status-select ${colorClass}" onchange="updateCell('${rowId}', '${colName}', this.value); this.className='status-select ' + getStatusClass(this.value)">`;
-            statuses.forEach(s => {
-                select += `<option value="${s}" ${val === s ? 'selected' : ''}>${s || 'N/A'}</option>`;
-            });
-            select += `</select>`;
-            return select;
-        }
-
-        function getStatusClass(val) {
-            if (val === "CONCLUIDO" || val === "REALIZADO") return "status-concluido";
-            if (val === "ABERTO") return "status-aberto";
-            if (val === "AGUARDANDO" || val === "STAND BY") return "status-aguardando";
-            return "status-na";
-        }
-
-        // Função utilitária para gerar barra/input de progresso
-        function getProgressInput(value, rowId, colName) {
-            let num = parseInt(value) || 0;
-            return `
-                <div class="progress-wrapper">
-                    <input type="number" class="progress-input" value="${num}" min="0" max="100" onchange="updateCell('${rowId}', '${colName}', this.value)"> %
-                </div>
-            `;
-        }
-
-        // Renderizar todas as tabelas
         function renderAllTabs() {
             const container = document.getElementById('mainContent');
             container.innerHTML = "";
@@ -261,19 +194,24 @@
                     <div id="tab-${key}" class="tab-content">
                         <div class="content-header">
                             <h2>${tabData.title}</h2>
-                            <button class="btn btn-primary btn-sm" onclick="openAddModal('${key}')">
+                            <button class="btn btn-primary" onclick="openAddModal('${key}')">
                                 <i class="bi bi-plus-lg"></i> Novo Item
                             </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="table-${key}">
+                            <table class="table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 50px;">Ações</th>
+                                        <th style="width: 95px; cursor:default;">Ações</th>
                 `;
                 
+                // Cabeçalhos com lógica de Ordenação
                 tabData.columns.forEach(col => {
-                    html += `<th>${col}</th>`;
+                    let sortIcon = "";
+                    if(sortConfig[key] && sortConfig[key].col === col) {
+                        sortIcon = sortConfig[key].dir === 'asc' ? '<i class="bi bi-caret-up-fill sort-icon"></i>' : '<i class="bi bi-caret-down-fill sort-icon"></i>';
+                    }
+                    html += `<th onclick="sortTable('${key}', '${col}')" title="Clique para ordenar">${col} ${sortIcon}</th>`;
                 });
                 
                 html += `           </tr>
@@ -281,27 +219,18 @@
                                 <tbody>
                 `;
 
-                tabData.rows.forEach((row, index) => {
+                // Linhas
+                tabData.rows.forEach(row => {
                     html += `<tr id="tr-${row.id}">
                                 <td>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteRow('${key}', '${row.id}')" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    <div class="action-btns">
+                                        <button class="btn btn-outline-secondary btn-icon" onclick="duplicateRow('${key}', '${row.id}')" title="Duplicar"><i class="bi bi-files"></i></button>
+                                        <button class="btn btn-outline-danger btn-icon" onclick="deleteRow('${key}', '${row.id}')" title="Excluir"><i class="bi bi-trash3"></i></button>
+                                    </div>
                                 </td>`;
                     
                     tabData.columns.forEach(col => {
-                        let cellContent = "";
-                        let isStatus = col.toUpperCase().includes("STATUS");
-                        let isProgress = col.toUpperCase().includes("PROGRESSO");
-
-                        if (isStatus) {
-                            cellContent = getStatusSelect(row[col], row.id, col);
-                        } else if (isProgress) {
-                            cellContent = getProgressInput(row[col], row.id, col);
-                        } else {
-                            // Célula editável texto
-                            cellContent = `<span class="editable-cell" contenteditable="true" onblur="updateCell('${row.id}', '${col}', this.innerText)">${row[col] || ""}</span>`;
-                        }
-                        
-                        html += `<td>${cellContent}</td>`;
+                        html += `<td>${renderCell(key, row, col)}</td>`;
                     });
                     
                     html += `</tr>`;
@@ -317,54 +246,209 @@
             }
         }
 
-        // Atualizar dado em memória
-        function updateCell(rowId, colName, value) {
-            for (const tabKey in appData) {
-                const row = appData[tabKey].rows.find(r => r.id === rowId);
-                if (row) {
-                    if (row[colName] !== value) {
-                        row[colName] = value;
-                        markChanged();
+        // ==========================================
+        // ORDENAÇÃO DE COLUNAS (NOVO)
+        // ==========================================
+        function sortTable(tabKey, colName) {
+            if (!sortConfig[tabKey]) sortConfig[tabKey] = { col: null, dir: 'asc' };
+            
+            let currentSort = sortConfig[tabKey];
+            
+            // Inverte direção se clicar na mesma coluna
+            if (currentSort.col === colName) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.col = colName;
+                currentSort.dir = 'asc';
+            }
+
+            // Lógica de parser para descobrir se é número, texto ou vazio
+            const parseVal = (v) => {
+                if(v === undefined || v === null || v === "") return "";
+                let str = String(v).trim();
+                let colUpper = colName.toUpperCase().trim();
+                
+                if(colUpper === "NOTA" || colUpper.includes("PROGRESSO") || colUpper === "KM" || colUpper === "VALOR" || colUpper === "#") {
+                    let num = parseFloat(str.replace(/[^0-9.-]+/g,""));
+                    return isNaN(num) ? -999999 : num; // Joga pra baixo se não for número validado
+                }
+                return str.toUpperCase();
+            };
+
+            appData[tabKey].rows.sort((a, b) => {
+                let pA = parseVal(a[colName]);
+                let pB = parseVal(b[colName]);
+                
+                // Joga os vazios sempre para o final da lista
+                if(pA === "" && pB !== "") return 1;
+                if(pB === "" && pA !== "") return -1;
+                if(pA === "" && pB === "") return 0;
+
+                if (pA < pB) return currentSort.dir === 'asc' ? -1 : 1;
+                if (pA > pB) return currentSort.dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            document.getElementById('btnSave').style.display = 'block';
+            renderAllTabs();
+            showTab(tabKey);
+        }
+
+        // ==========================================
+        // LÓGICA DAS CÉLULAS (Medalhas, Status, Barras)
+        // ==========================================
+        function renderCell(tabKey, row, colName) {
+            let val = row[colName] !== undefined ? row[colName] : "";
+            let colUpper = colName.toUpperCase().trim();
+            
+            // STATUS
+            if (colUpper.includes("STATUS")) {
+                const statuses = ["CONCLUIDO", "ABERTO", "AGUARDANDO", "REALIZADO", "NA", ""];
+                let v = val.toString().toUpperCase().trim();
+                if(v === "CONCLUÍDO") v = "CONCLUIDO";
+                
+                let select = `<select class="status-select ${getStatusClass(v)}" onchange="updateData('${tabKey}', '${row.id}', '${colName}', this.value); this.className='status-select ' + getStatusClass(this.value)">`;
+                statuses.forEach(s => {
+                    let text = s === "" ? "SELECIONE" : s;
+                    select += `<option value="${s}" ${v === s ? 'selected' : ''}>${text}</option>`;
+                });
+                select += `</select>`;
+                return select;
+            }
+            
+            // PROGRESSO
+            if (colUpper.includes("PROGRESSO")) {
+                let num = parseInt(val) || 0;
+                return `
+                    <div class="progress-wrapper">
+                        <input type="number" class="progress-input" value="${num}" min="0" max="100" 
+                        onchange="handleProgressChange('${tabKey}', '${row.id}', '${colName}', this.value)"> %
+                    </div>
+                `;
+            }
+            
+            // NOTA (Medalhas de Ouro, Prata, Bronze)
+            if (colUpper === "NOTA") {
+                let numVal = parseFloat(val);
+                
+                if (!isNaN(numVal) && val !== "") {
+                    if (numVal === 10) {
+                        return `<span class="nota-medal nota-ouro" contenteditable="true" onblur="updateData('${tabKey}', '${row.id}', '${colName}', this.innerText.replace(/[^0-9.]/g, '').trim())">🥇 ${numVal}</span>`;
+                    } else if (numVal >= 9) {
+                        return `<span class="nota-medal nota-prata" contenteditable="true" onblur="updateData('${tabKey}', '${row.id}', '${colName}', this.innerText.replace(/[^0-9.]/g, '').trim())">🥈 ${numVal}</span>`;
+                    } else if (numVal >= 7 && numVal < 9) {
+                        return `<span class="nota-medal nota-bronze" contenteditable="true" onblur="updateData('${tabKey}', '${row.id}', '${colName}', this.innerText.replace(/[^0-9.]/g, '').trim())">🥉 ${numVal}</span>`;
                     }
-                    break;
+                }
+            }
+            
+            // CÉLULA PADRÃO (Texto editável)
+            return `<span class="editable-cell" contenteditable="true" onblur="updateData('${tabKey}', '${row.id}', '${colName}', this.innerText)">${val}</span>`;
+        }
+
+        function getStatusClass(val) {
+            let v = val.toString().toUpperCase().trim();
+            if (v === "CONCLUIDO" || v === "REALIZADO") return "status-concluido";
+            if (v === "ABERTO") return "status-aberto";
+            if (v === "AGUARDANDO" || v === "STAND BY") return "status-aguardando";
+            return "status-na";
+        }
+
+        // ==========================================
+        // ATUALIZAÇÃO E REGRAS DE NEGÓCIO
+        // ==========================================
+        function updateData(tabKey, rowId, colName, value) {
+            let row = appData[tabKey].rows.find(r => r.id === rowId);
+            if (row && row[colName] !== value) {
+                row[colName] = value;
+                document.getElementById('btnSave').style.display = 'block';
+                
+                // Se atualizou nota, re-renderiza para processar a medalha
+                if(colName.toUpperCase().trim() === "NOTA") {
+                    renderAllTabs();
+                    showTab(tabKey);
                 }
             }
         }
 
-        // Deletar linha
-        function deleteRow(tabKey, rowId) {
-            if(confirm("Tem certeza que deseja excluir este item?")) {
-                appData[tabKey].rows = appData[tabKey].rows.filter(r => r.id !== rowId);
-                markChanged();
-                renderAllTabs(); // Re-renderiza para atualizar a view
-                showTab(tabKey); // Mantém na mesma aba
+        // Função Especial para Progresso (Dispara Animação e Status)
+        function handleProgressChange(tabKey, rowId, colName, value) {
+            let row = appData[tabKey].rows.find(r => r.id === rowId);
+            if (row) {
+                let num = parseInt(value) || 0;
+                if(num > 100) num = 100;
+                row[colName] = num.toString();
+                document.getElementById('btnSave').style.display = 'block';
+
+                // Regra: Se chegou a 100%, muda o status para CONCLUIDO
+                if (num === 100) {
+                    let statusCol = appData[tabKey].columns.find(c => c.toUpperCase().includes("STATUS"));
+                    if (statusCol && row[statusCol] !== "CONCLUIDO" && row[statusCol] !== "REALIZADO") {
+                        row[statusCol] = "CONCLUIDO";
+                        triggerConfetti();
+                    }
+                }
+                renderAllTabs();
+                showTab(tabKey);
             }
         }
 
-        // Lógica do Modal de Adição
-        let currentModalTab = "";
+        function triggerConfetti() {
+            if(typeof confetti === "function") {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#3b82f6', '#10b981', '#f59e0b', '#fde047']
+                });
+            }
+        }
+
+        // ==========================================
+        // AÇÕES DA TABELA (Duplicar, Excluir, Adicionar)
+        // ==========================================
+        function duplicateRow(tabKey, rowId) {
+            const tabData = appData[tabKey];
+            const originalRow = tabData.rows.find(r => r.id === rowId);
+            if (originalRow) {
+                let newRow = JSON.parse(JSON.stringify(originalRow));
+                newRow.id = "id_" + Date.now();
+                
+                let index = tabData.rows.findIndex(r => r.id === rowId);
+                tabData.rows.splice(index + 1, 0, newRow);
+                
+                document.getElementById('btnSave').style.display = 'block';
+                renderAllTabs();
+                showTab(tabKey);
+            }
+        }
+
+        function deleteRow(tabKey, rowId) {
+            if(confirm("Tem certeza que deseja excluir este item?")) {
+                appData[tabKey].rows = appData[tabKey].rows.filter(r => r.id !== rowId);
+                document.getElementById('btnSave').style.display = 'block';
+                renderAllTabs();
+                showTab(tabKey);
+            }
+        }
+
         function openAddModal(tabKey) {
             currentModalTab = tabKey;
             const tabData = appData[tabKey];
-            document.getElementById('modalTitle').innerText = `Adicionar em: ${tabData.title}`;
+            document.getElementById('modalTitle').innerText = `Novo em: ${tabData.title}`;
             
             let formHtml = `<form id="addForm">`;
             tabData.columns.forEach(col => {
-                let isStatus = col.toUpperCase().includes("STATUS");
-                let isProgress = col.toUpperCase().includes("PROGRESSO");
+                let colU = col.toUpperCase().trim();
+                formHtml += `<div class="mb-3"><label class="form-label">${col}</label>`;
                 
-                formHtml += `<div class="mb-3">
-                                <label class="form-label">${col}</label>`;
-                
-                if (isStatus) {
+                if (colU.includes("STATUS")) {
                     formHtml += `<select class="form-select" id="input-${col}">
                                     <option value="ABERTO">ABERTO</option>
                                     <option value="AGUARDANDO">AGUARDANDO</option>
                                     <option value="CONCLUIDO">CONCLUÍDO</option>
-                                    <option value="REALIZADO">REALIZADO</option>
-                                    <option value="STAND BY">STAND BY</option>
                                  </select>`;
-                } else if (isProgress) {
+                } else if (colU.includes("PROGRESSO")) {
                     formHtml += `<input type="number" class="form-control" id="input-${col}" value="0" min="0" max="100">`;
                 } else {
                     formHtml += `<input type="text" class="form-control" id="input-${col}">`;
@@ -380,40 +464,49 @@
 
         function saveNewItem() {
             const tabData = appData[currentModalTab];
-            let newRow = { id: "id_" + Date.now() }; // Gera ID unico
+            let newRow = { id: "id_" + Date.now() }; 
             
             tabData.columns.forEach(col => {
                 newRow[col] = document.getElementById(`input-${col}`).value;
             });
             
             tabData.rows.push(newRow);
-            markChanged();
+            document.getElementById('btnSave').style.display = 'block';
             
             bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
             renderAllTabs();
             showTab(currentModalTab);
         }
 
-        // Salvar no LocalStorage
+        // ==========================================
+        // SALVAR E EXPORTAR
+        // ==========================================
         function saveData() {
-            localStorage.setItem('dashboard2026_data', JSON.stringify(appData));
-            hasChanges = false;
+            localStorage.setItem('dashboard2026_data_v4', JSON.stringify(appData));
             document.getElementById('btnSave').style.display = 'none';
-            alert('Alterações salvas com sucesso no seu navegador!');
+            
+            let btn = document.getElementById('btnSave');
+            let origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Salvo!';
+            btn.classList.replace('btn-success', 'btn-primary');
+            btn.style.display = 'block';
+            setTimeout(() => {
+                btn.innerHTML = origHTML;
+                btn.classList.replace('btn-primary', 'btn-success');
+                btn.style.display = 'none';
+            }, 2000);
         }
 
-        // Exportar Dados (Backup)
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href",     dataStr);
-            downloadAnchorNode.setAttribute("download", "backup_dashboard_2026.json");
-            document.body.appendChild(downloadAnchorNode); // required for firefox
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = "backup_dashboard_2026_final.json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
 
-        // Inicia a aplicação
         window.onload = initApp;
 
     </script>

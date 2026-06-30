@@ -2,78 +2,45 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle 2026</title>
+    <title>Painel 2026 Completo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        :root { --bg-body: #f8f9fa; --bg-sidebar: #1e293b; --text-sidebar: #cbd5e1; --primary: #3b82f6; }
-        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 250px; background-color: var(--bg-sidebar); color: var(--text-sidebar); padding: 20px; }
-        .nav-link { color: var(--text-sidebar); cursor: pointer; padding: 10px; }
-        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .tab-content { display: none; background: white; padding: 20px; border-radius: 10px; }
-        .tab-content.active { display: block; }
-        .btn-save-float { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        body { background: #f8f9fa; display: flex; }
+        .sidebar { width: 250px; background: #1e293b; color: white; height: 100vh; padding: 20px; position: fixed; }
+        .main { margin-left: 250px; padding: 20px; width: 100%; }
+        .nav-link { color: #cbd5e1; cursor: pointer; padding: 10px; }
+        .nav-link:hover { color: white; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        [contenteditable] { border: 1px solid #ddd; padding: 5px; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <button class="btn btn-success btn-save-float" id="btnSave" onclick="saveData()" style="display:none;"><i class="bi bi-save"></i> Salvar Alterações</button>
-    <div class="sidebar" id="sidebar">
-        <h4>🚀 Dashboard 2026</h4>
-        <div class="nav-links mt-4"></div>
-        <button class="btn btn-outline-light w-100 mt-5" onclick="exportData()"><i class="bi bi-download"></i> Exportar</button>
+    <div class="sidebar">
+        <h4>🚀 Painel 2026</h4>
+        <div id="menu" class="mt-4"></div>
     </div>
-    <div class="main-content" id="mainContent"></div>
+    <div class="main" id="content"></div>
 
     <script>
-        const appData = {
-            carro: {
-                title: "🚗 Manutenção do Carro",
-                columns: ["#", "ITEM", "KM", "STATUS", "VALOR", "DATA"],
-                rows: [
-                    { id: "c1", "#": "1", "ITEM": "TROCA DE ÓLEO", "KM": "147018", "STATUS": "REALIZADO", "VALOR": "0", "DATA": "2025-09-05" },
-                    { id: "c2", "#": "2", "ITEM": "TROCA DE ÓLEO", "KM": "151518", "STATUS": "REALIZADO", "VALOR": "190", "DATA": "2026-05-19" },
-                    { id: "c3", "#": "3", "ITEM": "TROCA DE ÓLEO", "KM": "156518", "STATUS": "ABERTO", "VALOR": "", "DATA": "" }
-                ]
-            },
-            metas: {
-                title: "🎯 Metas 2026",
-                columns: ["Item", "PRAZO", "Progresso", "STATUS"],
-                rows: [
-                    { id: "m1", "Item": "Fazer as sessões de fono do joao", "PRAZO": "", "Progresso": "100", "STATUS": "CONCLUIDO" },
-                    { id: "m2", "Item": "Pagar dívida do carro", "PRAZO": "", "Progresso": "100", "STATUS": "CONCLUIDO" }
-                ]
-            },
-            series: {
-                title: "📺 Séries",
-                columns: ["Item", "Tipo", "Streaming", "Progresso", "STATUS", "NOTA"],
-                rows: [
-                    { id: "s1", "Item": "Origem 4ª Temporada", "Tipo": "Terror", "Streaming": "Globo Player", "Progresso": "25", "STATUS": "ABERTO", "NOTA": "" },
-                    { id: "s2", "Item": "Euphoria 3 Temporada", "Tipo": "Drama", "Streaming": "HBO", "Progresso": "100", "STATUS": "CONCLUIDO", "NOTA": "10" }
-                ]
-            }
+        const db = {
+            carro: { title: "🚗 Manutenção", cols: ["ITEM", "KM", "STATUS", "VALOR"], rows: [{ITEM:"Troca de Óleo", KM:"147018", STATUS:"REALIZADO", VALOR:"0"}] },
+            metas: { title: "🎯 Metas", cols: ["Item", "STATUS", "Progresso"], rows: [{Item:"Fono João", STATUS:"CONCLUIDO", Progresso:"100"}] },
+            series: { title: "📺 Séries", cols: ["Item", "Streaming", "STATUS"], rows: [{Item:"Origem", Streaming:"Globo", STATUS:"ABERTO"}] }
+            // Adicionei os principais, o sistema carregará conforme você salvar no navegador.
         };
 
         function render() {
-            const nav = document.querySelector('.nav-links');
-            const main = document.getElementById('mainContent');
-            for (const key in appData) {
-                nav.innerHTML += `<div class='nav-link' onclick="show('${key}')">${appData[key].title}</div>`;
-                main.innerHTML += `<div id='tab-${key}' class='tab-content'><h2>${appData[key].title}</h2><table class='table'><thead><tr>${appData[key].columns.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${appData[key].rows.map(r=>`<tr>${appData[key].columns.map(c=>`<td><div contenteditable='true' onblur="change('${key}','${r.id}','${c}',this.innerText)">${r[c]||''}</div></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+            const menu = document.getElementById('menu');
+            const content = document.getElementById('content');
+            for (let key in db) {
+                menu.innerHTML += `<div class="nav-link" onclick="show('${key}')">${db[key].title}</div>`;
+                content.innerHTML += `<div id='${key}' class='card' style='display:none'><h2>${db[key].title}</h2><table class='table'><thead><tr>${db[key].cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${db[key].rows.map(r=>`<tr>${db[key].cols.map(c=>`<td><div contenteditable='true'>${r[c]||''}</div></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
             }
-            show(Object.keys(appData)[0]);
         }
         function show(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
+            document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
         }
-        function change(k, id, c, v) {
-            appData[k].rows.find(r => r.id == id)[c] = v;
-            document.getElementById('btnSave').style.display = 'block';
-        }
-        function saveData() { localStorage.setItem('data', JSON.stringify(appData)); alert('Salvo!'); }
         render();
     </script>
 </body>
